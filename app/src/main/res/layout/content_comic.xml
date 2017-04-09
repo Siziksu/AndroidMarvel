@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/detailContent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_pattern"
+    tools:showIn="@layout/activity_comic"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+    <RelativeLayout
+        android:id="@+id/comicBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/comicMarvel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/red"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/textColorPrimaryInverse"
+            android:text="@string/marvel" />
+
+        <TextView
+            android:id="@+id/comicTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/comicMarvel"
+            android:background="@color/black"
+            android:padding="10dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/textColorPrimaryInverse"
+            android:text="@string/app_name" />
+    </RelativeLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_below="@+id/comicBanner"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/comicArt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/marvel_placeholder"
+                android:layout_marginBottom="10dp"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/comicName"
+                android:layout_below="@+id/comicArt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="4"
+                android:ellipsize="end"
+                android:textColor="@color/colorPrimary"
+                android:text="@string/app_name" />
+
+            <TextView
+                android:id="@+id/comicFormat"
+                android:layout_below="@+id/comicName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textSize="14sp"
+                android:textColor="@color/textColorSecondary"
+                android:text="@string/app_name" />
+
+            <TextView
+                android:id="@+id/comicDescription"
+                android:layout_below="@+id/comicFormat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/textColorPrimaryInverse"
+                android:text="@string/app_name" />
+        </RelativeLayout>
+    </android.support.v4.widget.NestedScrollView>
+</RelativeLayout>

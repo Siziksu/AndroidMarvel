@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/webContent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_pattern"
+    tools:showIn="@layout/activity_web"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/webSwipeRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.siziksu.marvel.ui.custom.NestedWebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:scrollbars="vertical" />
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <ProgressBar
+        android:id="@+id/webProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_centerHorizontal="true"
+        android:padding="0dp"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:progressDrawable="@drawable/custom_progress_bar"
+        android:max="100"
+        android:progress="0" />
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/noData"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/connection_error"
+        android:textSize="18sp"
+        android:textColor="@color/textColorPrimary" />
+</RelativeLayout>

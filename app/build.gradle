@@ -1,0 +1,68 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.jakewharton.butterknife'
+apply plugin: 'me.tatarka.retrolambda'
+
+apply from: 'dependencies.gradle'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.siziksu.marvel"
+        minSdkVersion 19
+        targetSdkVersion 25
+        versionCode 2515001
+        versionName "0.0.1"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        buildTypes.each {
+            it.buildConfigField "String", "API_PUBLIC_KEY", "\"527f7da15e6c2b72e526061271eb7617\""
+            it.buildConfigField "String", "API_PRIVATE_KEY", "\"d6bdd8caa9e088ab47f9e848772572a294c4154b\""
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/rxjava.properties'
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    androidTestCompile android_test_annotations
+    androidTestCompile android_test_runner
+    androidTestCompile android_test_rules
+    testCompile junit
+
+    compile android_support_v4
+    compile android_appcompat_v7
+    compile android_design
+    compile android_cardview_v7
+    compile android_percent
+
+    compile picasso
+
+    compile butterknife
+    annotationProcessor butterknife_compiler
+
+    compile rxjava
+    compile rxandroid
+
+    compile retrofit2
+    compile retrofit2_converter_gson
+    compile retrofit2_rx_adapter
+
+    compile okhhtp3
+    compile okhttp3_loggin_interceptor
+
+    compile dagger2
+    annotationProcessor dagger2_compiler
+}
