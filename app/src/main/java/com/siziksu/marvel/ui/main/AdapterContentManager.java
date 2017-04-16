@@ -24,7 +24,7 @@ final class AdapterContentManager {
         if (!character.comics.items.isEmpty()) {
             return character.comics.items.size() + context.getString(R.string.comics);
         } else {
-            return "";
+            return 0 + context.getString(R.string.comics);
         }
     }
 
@@ -32,7 +32,7 @@ final class AdapterContentManager {
         if (!character.series.items.isEmpty()) {
             return character.series.items.size() + context.getString(R.string.series);
         } else {
-            return "";
+            return 0 + context.getString(R.string.series);
         }
     }
 
@@ -40,7 +40,7 @@ final class AdapterContentManager {
         if (!character.events.items.isEmpty()) {
             return character.events.items.size() + context.getString(R.string.events);
         } else {
-            return "";
+            return 0 + context.getString(R.string.events);
         }
     }
 
@@ -48,7 +48,7 @@ final class AdapterContentManager {
         if (!character.stories.items.isEmpty()) {
             return character.stories.items.size() + context.getString(R.string.stories);
         } else {
-            return "";
+            return 0 + context.getString(R.string.stories);
         }
     }
 }
