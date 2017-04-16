@@ -6,5 +6,5 @@ public interface IBaseView {
 
     Activity getActivity();
 
-    void showProgress(boolean value, boolean swipe);
+    void showProgress(boolean value);
 }

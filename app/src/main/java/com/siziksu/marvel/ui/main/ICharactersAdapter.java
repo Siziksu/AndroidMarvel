@@ -1,6 +1,6 @@
 package com.siziksu.marvel.ui.main;
 
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.siziksu.marvel.common.model.response.characters.Character;
@@ -17,7 +17,7 @@ interface ICharactersAdapter {
 
     void clear();
 
-    LinearLayoutManager getLayoutManager();
+    GridLayoutManager getLayoutManager();
 
     RecyclerView.OnScrollListener getOnScrollListener();
 

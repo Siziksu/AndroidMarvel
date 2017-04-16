@@ -1,7 +1,7 @@
 package com.siziksu.marvel.ui.detail;
 
 import android.content.Context;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,24 +15,29 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 final class ComicsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements IComicsAdapter {
+
+    private static final String PATTERN = ".*image_not_available.*";
 
     private final List<Comic> comics;
     private final Context context;
     private final ClickListener listener;
-    private final LinearLayoutManager layoutManager;
+    private final GridLayoutManager layoutManager;
 
     ComicsAdapter(Context context, ClickListener listener) {
         this.context = context;
         this.listener = listener;
         this.comics = new ArrayList<>();
-        this.layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        int spanCount = context.getResources().getInteger(R.integer.movies_columns);
+        layoutManager = new GridLayoutManager(context, spanCount, GridLayoutManager.VERTICAL, false);
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.row_comic, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_comic, parent, false);
         return new ComicsViewHolder(view, listener);
     }
 
@@ -47,6 +52,13 @@ final class ComicsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                    .load(url)
                    .placeholder(R.drawable.marvel_placeholder)
                    .into(localHolder.comicArt);
+            Pattern alreadyPattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
+            Matcher alreadyMatcher = alreadyPattern.matcher(url);
+            if (alreadyMatcher.matches()) {
+                localHolder.comicName.setVisibility(View.VISIBLE);
+            } else {
+                localHolder.comicName.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -75,7 +87,7 @@ final class ComicsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     @Override
-    public LinearLayoutManager getLayoutManager() {
+    public GridLayoutManager getLayoutManager() {
         return layoutManager;
     }
 

@@ -7,9 +7,13 @@ import java.util.List;
 
 public interface IMainView extends IBaseView {
 
-    void showCharacters(List<Character> characters, boolean filtered, boolean more);
+    void showCharacters(List<Character> characters, boolean filtered, int totalCharacters);
 
     void showConnected(boolean value);
 
     void connectionError();
+
+    void stopRefreshing();
+
+    void noComicsAvailable();
 }

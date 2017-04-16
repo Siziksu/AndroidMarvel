@@ -6,13 +6,13 @@
     <color name="cardBackground">#563d3d3d</color>
     <color name="background">#252525</color>
     <color name="hint">#818181</color>
-    <color name="transparentMarvel">#25818181</color>
     <color name="searchBackground">#35000000</color>
-
     <color name="buttonPressed">@color/colorPrimaryDark</color>
     <color name="buttonDisabled">@color/hint</color>
     <color name="buttonFocused">@color/colorAccent</color>
     <color name="buttonDefault">@color/colorAccent</color>
     <color name="transparent">#00000000</color>
     <color name="red">#ff0000</color>
+    <color name="card_transparent">#99000000</color>
+    <color name="dark">#ff151515</color>
 </resources>

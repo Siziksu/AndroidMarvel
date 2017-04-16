@@ -6,7 +6,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -16,6 +15,7 @@ import android.widget.TextView;
 import com.siziksu.marvel.App;
 import com.siziksu.marvel.R;
 import com.siziksu.marvel.common.Constants;
+import com.siziksu.marvel.common.functions.Consumer;
 import com.siziksu.marvel.common.model.response.characters.Character;
 import com.siziksu.marvel.common.model.response.comics.Comic;
 import com.siziksu.marvel.presenter.detail.IDetailPresenter;
@@ -75,18 +75,16 @@ public final class DetailActivity extends AppCompatActivity implements IDetailVi
                 (v, position) -> {
                     Comic comic = adapter.getItem(position);
                     if (comic != null && comic.urls.size() > 0) {
-                        detailPresenter.goToComic(character, comic);
+                        detailPresenter.showComicDetail(comic);
                     }
                 }
         );
         comics.setAdapter(adapter.getAdapter());
-        comics.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         comics.setItemAnimator(new DefaultItemAnimator());
         comics.setLayoutManager(adapter.getLayoutManager());
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            adapter.clear();
-            detailPresenter.getComics(character.id);
+            doAfterClearingAdapter(() -> detailPresenter.getComicsFromSwipeRefresh(character.id));
         });
     }
 
@@ -124,12 +122,8 @@ public final class DetailActivity extends AppCompatActivity implements IDetailVi
     }
 
     @Override
-    public void showProgress(boolean value, boolean swipe) {
-        if (swipe) {
-            swipeRefreshLayout.setRefreshing(value);
-        } else {
-            loading.setVisibility(value ? View.VISIBLE : View.GONE);
-        }
+    public void showProgress(boolean value) {
+        loading.setVisibility(value ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -150,6 +144,16 @@ public final class DetailActivity extends AppCompatActivity implements IDetailVi
     @Override
     public void connectionError() {
         Snackbar.make(findViewById(R.id.detailContent), getString(R.string.connection_error), Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void stopRefreshing() {
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    private void doAfterClearingAdapter(Consumer consumer) {
+        adapter.clear();
+        consumer.consume();
     }
 
     private void noData(boolean value) {

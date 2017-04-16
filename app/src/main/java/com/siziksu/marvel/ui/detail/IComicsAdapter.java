@@ -1,6 +1,6 @@
 package com.siziksu.marvel.ui.detail;
 
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.siziksu.marvel.common.model.response.comics.Comic;
@@ -17,7 +17,7 @@ interface IComicsAdapter {
 
     void clear();
 
-    LinearLayoutManager getLayoutManager();
+    GridLayoutManager getLayoutManager();
 
     void showComics(List<Comic> list);
 

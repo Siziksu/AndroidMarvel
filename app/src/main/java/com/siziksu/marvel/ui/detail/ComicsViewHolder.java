@@ -3,25 +3,29 @@ package com.siziksu.marvel.ui.detail;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.siziksu.marvel.R;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 final class ComicsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+    @BindView(R.id.comicView)
+    View comicView;
+    @BindView(R.id.comicName)
     TextView comicName;
+    @BindView(R.id.comicArt)
     ImageView comicArt;
 
     private ComicsAdapter.ClickListener listener;
 
     ComicsViewHolder(View view, ComicsAdapter.ClickListener listener) {
         super(view);
+        ButterKnife.bind(this, view);
         this.listener = listener;
-        RelativeLayout comicRow = (RelativeLayout) view.findViewById(R.id.comicRow);
-        comicRow.setOnClickListener(this);
-        comicName = (TextView) view.findViewById(R.id.comicName);
-        comicArt = (ImageView) view.findViewById(R.id.comicArt);
+        comicView.setOnClickListener(this);
     }
 
     @Override

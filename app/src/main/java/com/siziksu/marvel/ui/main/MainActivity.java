@@ -12,6 +12,8 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +23,7 @@ import android.widget.TextView;
 import com.siziksu.marvel.App;
 import com.siziksu.marvel.R;
 import com.siziksu.marvel.common.Constants;
+import com.siziksu.marvel.common.functions.Consumer;
 import com.siziksu.marvel.common.model.response.characters.Character;
 import com.siziksu.marvel.presenter.main.IMainPresenter;
 import com.siziksu.marvel.presenter.main.IMainView;
@@ -54,6 +57,8 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
     private int offset;
     private boolean firstTime = true;
     private String filter;
+    private boolean refreshing;
+    private int totalCharacters;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,26 +77,31 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
                 (v, position) -> {
                     Character character = adapter.getItem(position);
                     if (character != null && character.urls.size() > 0) {
-                        mainPresenter.goToCharacter(character);
+                        mainPresenter.goToCharacterDetail(character);
                     }
                 },
                 filtered -> {
+                    if (offset > totalCharacters) {
+                        return;
+                    }
                     if (!filtered) {
-                        mainPresenter.getCharacters(offset, Constants.PAGINATION_SIZE);
+                        mainPresenter.getCharacters(offset);
                     } else {
-                        mainPresenter.getFilteredCharacters(filter, offset, Constants.PAGINATION_SIZE);
+                        mainPresenter.getFilteredCharacters(filter, offset);
                     }
                 }
         );
         characters.addOnScrollListener(adapter.getOnScrollListener());
         characters.setAdapter(adapter.getAdapter());
-        characters.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         characters.setItemAnimator(new DefaultItemAnimator());
         characters.setLayoutManager(adapter.getLayoutManager());
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            adapter.clear();
-            mainPresenter.getCharacters(0, Constants.PAGINATION_SIZE);
+            doAfterClearingAdapter(() -> mainPresenter.getCharactersFromSwipeRefresh());
+            if (!searchView.isIconified()) {
+                refreshing = true;
+                searchView.onActionViewCollapsed();
+            }
         });
     }
 
@@ -100,8 +110,8 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
         if (searchView != null) {
             if (!searchView.isIconified()) {
                 searchView.onActionViewCollapsed();
-            } else if (adapter.isFiltered()) {
-                mainPresenter.getCharacters(0, Constants.PAGINATION_SIZE);
+            } else if (searchView.isIconified() && adapter.isFiltered()) {
+                requestFirstPage();
             } else {
                 super.onBackPressed();
             }
@@ -111,6 +121,7 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putInt(Constants.EXTRAS_OFFSET, offset);
+        savedInstanceState.putInt(Constants.EXTRAS_TOTAL_CHARACTERS, totalCharacters);
         savedInstanceState.putString(Constants.EXTRAS_FILTER, filter);
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -118,6 +129,7 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         offset = savedInstanceState.getInt(Constants.EXTRAS_OFFSET);
+        totalCharacters = savedInstanceState.getInt(Constants.EXTRAS_TOTAL_CHARACTERS);
         filter = savedInstanceState.getString(Constants.EXTRAS_FILTER);
     }
 
@@ -126,7 +138,7 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
         super.onResume();
         mainPresenter.register(this);
         if (firstTime) {
-            mainPresenter.getCharacters(offset, Constants.PAGINATION_SIZE);
+            mainPresenter.getCharacters(offset);
             firstTime = false;
         }
     }
@@ -152,25 +164,43 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
         if (searchItem != null) {
             searchView = (SearchView) searchItem.getActionView();
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-                @Override
-                public boolean onQueryTextSubmit(String text) {
-                    filter = text;
-                    mainPresenter.getFilteredCharacters(text, 0, Constants.PAGINATION_SIZE);
-                    searchView.setQuery("", false);
-                    searchView.onActionViewCollapsed();
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String text) {
-                    return false;
-                }
-            });
+            searchView.setOnQueryTextListener(onQueryTextListener);
         }
         return super.onPrepareOptionsMenu(menu);
     }
+
+    SearchView.OnQueryTextListener onQueryTextListener = new SearchView.OnQueryTextListener() {
+
+        private boolean submit;
+
+        @Override
+        public boolean onQueryTextSubmit(String text) {
+            submit = true;
+            searchView.onActionViewCollapsed();
+            return true;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String text) {
+            search(text);
+            return false;
+        }
+
+        private void search(String text) {
+            if (!refreshing) {
+                if (!submit) {
+                    filter = text;
+                    if (!TextUtils.isEmpty(text)) {
+                        doAfterClearingAdapter(() -> mainPresenter.getFilteredCharacters(text, 0));
+                    } else {
+                        requestFirstPage();
+                    }
+                }
+            }
+            refreshing = false;
+            submit = false;
+        }
+    };
 
     @Override
     public Activity getActivity() {
@@ -178,17 +208,16 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
     }
 
     @Override
-    public void showProgress(boolean value, boolean swipe) {
-        if (swipe) {
-            swipeRefreshLayout.setRefreshing(value);
-        } else {
-            loading.setVisibility(value ? View.VISIBLE : View.GONE);
-        }
+    public void showProgress(boolean value) {
+        loading.setVisibility(value ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void showCharacters(List<Character> characters, boolean filtered, boolean more) {
-        adapter.showCharacters(characters, filtered, more);
+    public void showCharacters(List<Character> characters, boolean filtered, int totalCharacters) {
+        Log.i(Constants.TAG, "Current offset: " + offset);
+        Log.i(Constants.TAG, "Total characters: " + totalCharacters);
+        this.totalCharacters = totalCharacters;
+        adapter.showCharacters(characters, filtered, offset > Constants.PAGINATION_SIZE);
         offset = adapter.getOffset();
         noData(!adapter.isEmpty());
     }
@@ -198,13 +227,31 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
         noData(value);
         if (!value) {
             connectionError();
-            swipeRefreshLayout.setRefreshing(false);
         }
     }
 
     @Override
     public void connectionError() {
         Snackbar.make(findViewById(R.id.mainContent), getString(R.string.connection_error), Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void stopRefreshing() {
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void noComicsAvailable() {
+        Snackbar.make(findViewById(R.id.mainContent), getString(R.string.no_comics_available), Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void requestFirstPage() {
+        doAfterClearingAdapter(() -> mainPresenter.getCharacters(0));
+    }
+
+    private void doAfterClearingAdapter(Consumer consumer) {
+        adapter.clear();
+        consumer.consume();
     }
 
     @OnClick(R.id.mainFab)

@@ -1,7 +1,7 @@
 package com.siziksu.marvel.ui.main;
 
 import android.content.Context;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,22 +25,23 @@ final class CharactersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private final EndOfListListener endOfListListener;
     private final OnScrollListener onScrollListener;
     private final AdapterContentManager adapterContentManager;
-    private final LinearLayoutManager layoutManager;
+    private final GridLayoutManager layoutManager;
     private boolean filtered;
 
     CharactersAdapter(Context context, ClickListener listener, EndOfListListener endOfListListener) {
         this.context = context;
         this.listener = listener;
-        this.adapterContentManager = new AdapterContentManager(context);
-        this.characters = new ArrayList<>();
-        this.layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-        this.onScrollListener = new OnScrollListener();
         this.endOfListListener = endOfListListener;
+        adapterContentManager = new AdapterContentManager(context);
+        characters = new ArrayList<>();
+        int spanCount = context.getResources().getInteger(R.integer.movies_columns);
+        layoutManager = new GridLayoutManager(context, spanCount, GridLayoutManager.VERTICAL, false);
+        onScrollListener = new OnScrollListener();
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.row_character, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_character, parent, false);
         return new CharactersViewHolder(view, listener);
     }
 
@@ -85,7 +86,7 @@ final class CharactersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     @Override
-    public LinearLayoutManager getLayoutManager() {
+    public GridLayoutManager getLayoutManager() {
         return layoutManager;
     }
 
