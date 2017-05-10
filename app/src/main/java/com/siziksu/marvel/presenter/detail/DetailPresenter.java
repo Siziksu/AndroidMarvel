@@ -120,6 +120,7 @@ public final class DetailPresenter extends IDetailPresenter {
         doIfViewIsRegistered(() -> {
             if (!isConnected) {
                 Log.d(Constants.TAG, view.getActivity().getResources().getString(R.string.connection_error));
+                stopProgress();
             } else {
                 consumer.consume();
             }
