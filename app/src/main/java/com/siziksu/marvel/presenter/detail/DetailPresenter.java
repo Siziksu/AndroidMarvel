@@ -16,6 +16,8 @@ import com.siziksu.marvel.domain.detail.IGetComicsRequest;
 import com.siziksu.marvel.ui.detail.DetailBottomSheetFragment;
 import com.siziksu.marvel.ui.web.WebActivity;
 
+import java.net.SocketTimeoutException;
+
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -79,6 +81,9 @@ public final class DetailPresenter extends IDetailPresenter {
     private void onError(Throwable throwable) {
         disposable = null;
         Log.e(Constants.TAG, throwable.getMessage(), throwable);
+        if (throwable instanceof SocketTimeoutException) {
+            doIfViewIsRegistered(() -> view.socketTimeout());
+        }
         stopProgress();
     }
 
@@ -130,7 +135,7 @@ public final class DetailPresenter extends IDetailPresenter {
                 intent.putExtra(Constants.EXTRAS_URL, character.urls.get(0).url);
                 view.getActivity().startActivity(intent);
             } else {
-                view.connectionError();
+                view.showConnected(false);
             }
         });
     }

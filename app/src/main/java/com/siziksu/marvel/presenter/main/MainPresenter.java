@@ -14,6 +14,8 @@ import com.siziksu.marvel.domain.main.IGetCharactersRequest;
 import com.siziksu.marvel.ui.detail.DetailActivity;
 import com.siziksu.marvel.ui.web.WebActivity;
 
+import java.net.SocketTimeoutException;
+
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -85,6 +87,9 @@ public final class MainPresenter extends IMainPresenter {
     private void onError(Throwable throwable) {
         disposable = null;
         Log.e(Constants.TAG, throwable.getMessage(), throwable);
+        if (throwable instanceof SocketTimeoutException) {
+            doIfViewIsRegistered(() -> view.socketTimeout());
+        }
         stopProgress();
     }
 
@@ -130,14 +135,14 @@ public final class MainPresenter extends IMainPresenter {
 
     @Override
     public void goToMarvel() {
+        boolean isConnected = connectionManager.getConnection().isConnected();
         doIfViewIsRegistered(() -> {
-            if (connectionManager.getConnection().isConnected()) {
+            if (isConnected) {
                 Intent intent = new Intent(view.getActivity(), WebActivity.class);
                 intent.putExtra(Constants.EXTRAS_URL, Constants.MARVEL_URL);
                 view.getActivity().startActivity(intent);
-            } else {
-                view.connectionError();
             }
+            view.showConnected(isConnected);
         });
     }
 

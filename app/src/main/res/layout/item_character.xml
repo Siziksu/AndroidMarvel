@@ -35,6 +35,8 @@
                 android:layout_centerHorizontal="true"
                 android:gravity="center"
                 android:background="@color/card_transparent"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:padding="5dp"
                 android:textSize="14sp"
                 android:textStyle="bold"

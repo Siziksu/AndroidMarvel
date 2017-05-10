@@ -5,6 +5,8 @@ import android.content.Context;
 import com.siziksu.marvel.App;
 import com.siziksu.marvel.common.ConnectionManager;
 import com.siziksu.marvel.dagger.scope.AppScope;
+import com.siziksu.marvel.ui.main.IMainPagination;
+import com.siziksu.marvel.ui.main.MainPagination;
 
 import dagger.Module;
 import dagger.Provides;
@@ -29,4 +31,8 @@ public final class AppModule {
         return new ConnectionManager(context);
     }
 
+    @Provides
+    IMainPagination providesMainPagination(MainPagination mainPagination) {
+        return mainPagination;
+    }
 }

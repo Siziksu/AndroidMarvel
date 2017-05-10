@@ -11,7 +11,7 @@ public interface IDetailView extends IBaseView {
 
     void showConnected(boolean value);
 
-    void connectionError();
-
     void stopRefreshing();
+
+    void socketTimeout();
 }

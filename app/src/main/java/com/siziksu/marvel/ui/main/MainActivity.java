@@ -8,12 +8,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,6 +38,8 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
 
     @Inject
     IMainPresenter mainPresenter;
+    @Inject
+    IMainPagination mainPagination;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -54,11 +54,9 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
 
     private ICharactersAdapter adapter;
     private SearchView searchView;
-    private int offset;
     private boolean firstTime = true;
     private String filter;
     private boolean refreshing;
-    private int totalCharacters;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,13 +79,13 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
                     }
                 },
                 filtered -> {
-                    if (offset > totalCharacters) {
+                    if (!mainPagination.shouldLoadMore()) {
                         return;
                     }
                     if (!filtered) {
-                        mainPresenter.getCharacters(offset);
+                        mainPresenter.getCharacters(mainPagination.getOffset());
                     } else {
-                        mainPresenter.getFilteredCharacters(filter, offset);
+                        mainPresenter.getFilteredCharacters(filter, mainPagination.getOffset());
                     }
                 }
         );
@@ -120,16 +118,16 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putInt(Constants.EXTRAS_OFFSET, offset);
-        savedInstanceState.putInt(Constants.EXTRAS_TOTAL_CHARACTERS, totalCharacters);
+        savedInstanceState.putInt(Constants.EXTRAS_OFFSET, mainPagination.getOffset());
+        savedInstanceState.putInt(Constants.EXTRAS_TOTAL_CHARACTERS, mainPagination.getTotalCharacters());
         savedInstanceState.putString(Constants.EXTRAS_FILTER, filter);
         super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-        offset = savedInstanceState.getInt(Constants.EXTRAS_OFFSET);
-        totalCharacters = savedInstanceState.getInt(Constants.EXTRAS_TOTAL_CHARACTERS);
+        mainPagination.setOffset(savedInstanceState.getInt(Constants.EXTRAS_OFFSET));
+        mainPagination.setTotalCharacters(savedInstanceState.getInt(Constants.EXTRAS_TOTAL_CHARACTERS));
         filter = savedInstanceState.getString(Constants.EXTRAS_FILTER);
     }
 
@@ -138,7 +136,7 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
         super.onResume();
         mainPresenter.register(this);
         if (firstTime) {
-            mainPresenter.getCharacters(offset);
+            mainPresenter.getCharacters(mainPagination.getOffset());
             firstTime = false;
         }
     }
@@ -214,25 +212,15 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
 
     @Override
     public void showCharacters(List<Character> characters, boolean filtered, int totalCharacters) {
-        Log.i(Constants.TAG, "Current offset: " + offset);
-        Log.i(Constants.TAG, "Total characters: " + totalCharacters);
-        this.totalCharacters = totalCharacters;
-        adapter.showCharacters(characters, filtered, offset > Constants.PAGINATION_SIZE);
-        offset = adapter.getOffset();
-        noData(!adapter.isEmpty());
+        mainPagination.setCharacters(totalCharacters);
+        adapter.showCharacters(characters, filtered, mainPagination.isNotFirstPage());
+        mainPagination.setOffset(adapter.getOffset());
+        noData(adapter.isEmpty(), getString(R.string.no_data));
     }
 
     @Override
     public void showConnected(boolean value) {
-        noData(value);
-        if (!value) {
-            connectionError();
-        }
-    }
-
-    @Override
-    public void connectionError() {
-        Snackbar.make(findViewById(R.id.mainContent), getString(R.string.connection_error), Snackbar.LENGTH_SHORT).show();
+        noData(!value, getString(R.string.connection_error));
     }
 
     @Override
@@ -245,12 +233,18 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
         Snackbar.make(findViewById(R.id.mainContent), getString(R.string.no_comics_available), Snackbar.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void socketTimeout() {
+        noData(true, getString(R.string.connection_timeout));
+    }
+
     private void requestFirstPage() {
         doAfterClearingAdapter(() -> mainPresenter.getCharacters(0));
     }
 
     private void doAfterClearingAdapter(Consumer consumer) {
         adapter.clear();
+        mainPagination.reset();
         consumer.consume();
     }
 
@@ -259,8 +253,9 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
         mainPresenter.goToMarvel();
     }
 
-    private void noData(boolean value) {
-        if (!value) {
+    private void noData(boolean value, String string) {
+        if (value) {
+            noData.setText(string);
             noData.setVisibility(View.VISIBLE);
         } else {
             noData.setVisibility(View.GONE);

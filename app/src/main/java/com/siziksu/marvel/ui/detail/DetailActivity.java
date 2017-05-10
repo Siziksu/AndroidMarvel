@@ -2,7 +2,6 @@ package com.siziksu.marvel.ui.detail;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -83,9 +82,7 @@ public final class DetailActivity extends AppCompatActivity implements IDetailVi
         comics.setItemAnimator(new DefaultItemAnimator());
         comics.setLayoutManager(adapter.getLayoutManager());
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            doAfterClearingAdapter(() -> detailPresenter.getComicsFromSwipeRefresh(character.id));
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> doAfterClearingAdapter(() -> detailPresenter.getComicsFromSwipeRefresh(character.id)));
     }
 
     @Override
@@ -129,21 +126,15 @@ public final class DetailActivity extends AppCompatActivity implements IDetailVi
     @Override
     public void showComics(List<Comic> comics) {
         adapter.showComics(comics);
-        noData(!adapter.isEmpty());
+        noData(adapter.isEmpty(), getString(R.string.no_data));
     }
 
     @Override
     public void showConnected(boolean value) {
-        noData(value);
+        noData(!value, getString(R.string.connection_error));
         if (!value) {
-            connectionError();
             swipeRefreshLayout.setRefreshing(false);
         }
-    }
-
-    @Override
-    public void connectionError() {
-        Snackbar.make(findViewById(R.id.detailContent), getString(R.string.connection_error), Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
@@ -151,13 +142,19 @@ public final class DetailActivity extends AppCompatActivity implements IDetailVi
         swipeRefreshLayout.setRefreshing(false);
     }
 
+    @Override
+    public void socketTimeout() {
+        noData(true, getString(R.string.connection_timeout));
+    }
+
     private void doAfterClearingAdapter(Consumer consumer) {
         adapter.clear();
         consumer.consume();
     }
 
-    private void noData(boolean value) {
-        if (!value) {
+    private void noData(boolean value, String string) {
+        if (value) {
+            noDataText.setText(string);
             noDataText.setVisibility(View.VISIBLE);
         } else {
             noDataText.setVisibility(View.GONE);

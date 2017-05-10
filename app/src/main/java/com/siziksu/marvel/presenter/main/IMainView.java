@@ -11,9 +11,9 @@ public interface IMainView extends IBaseView {
 
     void showConnected(boolean value);
 
-    void connectionError();
-
     void stopRefreshing();
 
     void noComicsAvailable();
+
+    void socketTimeout();
 }

@@ -17,18 +17,12 @@ public class Character implements Parcelable {
     @SerializedName("name")
     @Expose
     public String name;
-    @SerializedName("description")
-    @Expose
-    public String description;
     @SerializedName("modified")
     @Expose
     public String modified;
     @SerializedName("thumbnail")
     @Expose
     public Thumbnail thumbnail;
-    @SerializedName("resourceURI")
-    @Expose
-    public String resourceURI;
     @SerializedName("comics")
     @Expose
     public Comics comics;
@@ -45,6 +39,8 @@ public class Character implements Parcelable {
     @Expose
     public List<Url> urls = new ArrayList<Url>();
 
+    public Character() {}
+
     @Override
     public int describeContents() { return 0; }
 
@@ -52,32 +48,25 @@ public class Character implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeValue(this.id);
         dest.writeString(this.name);
-        dest.writeString(this.description);
         dest.writeString(this.modified);
         dest.writeParcelable(this.thumbnail, flags);
-        dest.writeString(this.resourceURI);
         dest.writeParcelable(this.comics, flags);
         dest.writeParcelable(this.series, flags);
         dest.writeParcelable(this.stories, flags);
         dest.writeParcelable(this.events, flags);
-        dest.writeList(this.urls);
+        dest.writeTypedList(this.urls);
     }
-
-    public Character() {}
 
     protected Character(Parcel in) {
         this.id = (Integer) in.readValue(Integer.class.getClassLoader());
         this.name = in.readString();
-        this.description = in.readString();
         this.modified = in.readString();
         this.thumbnail = in.readParcelable(Thumbnail.class.getClassLoader());
-        this.resourceURI = in.readString();
         this.comics = in.readParcelable(Comics.class.getClassLoader());
         this.series = in.readParcelable(Series.class.getClassLoader());
         this.stories = in.readParcelable(Stories.class.getClassLoader());
         this.events = in.readParcelable(Events.class.getClassLoader());
-        this.urls = new ArrayList<Url>();
-        in.readList(this.urls, Url.class.getClassLoader());
+        this.urls = in.createTypedArrayList(Url.CREATOR);
     }
 
     public static final Parcelable.Creator<Character> CREATOR = new Parcelable.Creator<Character>() {

@@ -17,6 +17,7 @@
     <string name="events">" events\n"</string>
     <string name="stories">" stories\n"</string>
     <string name="connection_error">Network not available</string>
+    <string name="connection_timeout">"Connection timeout\n\nTry again refreshing"</string>
     <string name="no_data">"No data available"</string>
     <string name="loading">Loading…</string>
     <string name="comics_of">"Comics of "</string>
