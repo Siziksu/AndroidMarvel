@@ -234,7 +234,7 @@ public final class MainActivity extends AppCompatActivity implements IMainView {
     }
 
     @Override
-    public void socketTimeout() {
+    public void connectionTimeout() {
         noData(true, getString(R.string.connection_timeout));
     }
 

@@ -15,5 +15,5 @@ public interface IMainView extends IBaseView {
 
     void noComicsAvailable();
 
-    void socketTimeout();
+    void connectionTimeout();
 }

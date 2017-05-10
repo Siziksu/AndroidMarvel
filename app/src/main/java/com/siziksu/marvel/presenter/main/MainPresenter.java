@@ -88,7 +88,7 @@ public final class MainPresenter extends IMainPresenter {
         disposable = null;
         Log.e(Constants.TAG, throwable.getMessage(), throwable);
         if (throwable instanceof SocketTimeoutException) {
-            doIfViewIsRegistered(() -> view.socketTimeout());
+            doIfViewIsRegistered(() -> view.connectionTimeout());
         }
         stopProgress();
     }
